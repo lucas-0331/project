@@ -18,10 +18,10 @@ class Product extends Model
     ];
     public function clients()
     {
-        $this->belongsTo(Client::class);
+        return $this->belongsTo(Client::class);
     }
 
-    public function products_categories()
+    public function product_categories()
     {
         return $this->belongsTo(ProductCategory::class);
     }
