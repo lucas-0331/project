@@ -1,6 +1,20 @@
 const pool = require('../database/connection');
 const bcrypt = require('bcrypt');
 
+const getAllUser = async (req, res) => {
+  try {
+    const result = await pool.query('SELECT nick_name, first_name, last_name, email, birth_date FROM users');
+
+    const allUsers = result.rows;
+
+    res.status(200).json({ data: allUsers });
+
+  } catch (error) {
+    console.error('Erro ao buscar usuários no banco de dados:', error);
+    res.status(500).json({ error: 'Não foi possível buscar a lista de usuários.' });
+  }
+}
+
 const storeUser = async (req, res) => {
   const { nickName, firstName, lastName, email, password, birthDate } = req.body;
 
@@ -36,5 +50,6 @@ const storeUser = async (req, res) => {
 };
 
 module.exports = {
+  getAllUser,
   storeUser,
 };
