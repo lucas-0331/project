@@ -21,8 +21,6 @@ const storeUser = async (req, res) => {
 
     const result = await pool.query(query, values);
 
-    console.log(result);
-
     const newUser = result.rows[0];
     delete newUser.password;
 
