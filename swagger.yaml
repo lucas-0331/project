@@ -1,0 +1,79 @@
+openapi: 3.0.0
+info:
+  title: Vapor
+  version: 1.0.0
+  description: Uma API para gerenciar jogos, documentada em um arquivo YAML.
+servers:
+  - url: http://localhost:3000/api
+tags:
+  - name: Usuários
+    description: Operações relacionadas a usuários
+
+paths:
+  /users:
+    get:
+      summary: Retorna a lista de todos os usuários.
+      tags:
+        - Usuários
+      responses:
+        '200':
+          description: Uma lista de objetos de usuário.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+
+  /users/store:
+    post:
+      summary: Cria um novo usuário.
+      tags:
+        - Usuários
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserData'
+      responses:
+        '201':
+          description: Usuário criado com sucesso.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Usuário cadastrado com sucesso!
+        '400':
+          description: Dados inválidos fornecidos.
+
+components:
+  schemas:
+    UserData:
+      type: object
+      properties:
+        nick_name:
+          type: string
+          example: ArtDent
+        first_name:
+          type: string
+          example: Artur
+        last_name:
+          type: string
+          example: Dent
+        email:
+          type: string
+          example: artur@dent.com
+        birth_date:
+          type: string
+          format: date-time
+          example: "1998-03-31T03:00:00.000Z"
+
+    UserResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserData'
