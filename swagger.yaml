@@ -8,6 +8,8 @@ servers:
 tags:
   - name: Usuários
     description: Operações relacionadas a usuários
+  - name: Listas
+    description: Operações relacionadas a listas
 
 paths:
   /users:
@@ -48,6 +50,102 @@ paths:
         '400':
           description: Dados inválidos fornecidos.
 
+  /lists:
+    get:
+      summary: Retorna todas as listas do usuário.
+      tags:
+        - Listas
+      responses:
+        '200':
+          description: Listas retornadas com sucesso.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/List'
+
+    post:
+      summary: Cria uma nova lista.
+      tags:
+        - Listas
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListInput'
+      responses:
+        '201':
+          description: Lista criada com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/List'
+
+  /lists/{id}:
+    get:
+      summary: Retorna uma lista pelo ID.
+      tags:
+        - Listas
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lista encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/List'
+        '404':
+          description: Lista não encontrada.
+
+    put:
+      summary: Atualiza uma lista existente.
+      tags:
+        - Listas
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListInput'
+      responses:
+        '200':
+          description: Lista atualizada com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/List'
+        '404':
+          description: Lista não encontrada.
+
+    delete:
+      summary: Deleta uma lista.
+      tags:
+        - Listas
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lista deletada com sucesso.
+        '404':
+          description: Lista não encontrada.
+
 components:
   schemas:
     UserData:
@@ -77,3 +175,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/UserData'
+
+    List:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        name:
+          type: string
+        icon:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    ListInput:
+      type: object
+      properties:
+        name:
+          type: string
+        icon:
+          type: string
