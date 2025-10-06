@@ -7,6 +7,7 @@ const app = express();
 const swaggerDocument = YAML.load('./swagger.yaml');
 
 const gamesRoutes = require('./routes/gamesRoutes');
+const listsRoutes = require('./routes/listsRoutes');
 const usersRoutes = require('./routes/usersRoutes');
 
 app.use(express.json());
@@ -14,6 +15,7 @@ app.use(express.json());
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use('/api/games', gamesRoutes);
+app.use('/api/lists', listsRoutes);
 app.use('/api/users', usersRoutes);
 
 app.get('/', (req, res) => {
