@@ -19,6 +19,10 @@ Este projeto foi desenvolvido como parte da disciplina **Tópicos Especiais II**
 
 ---
 
+## [Modelagem do Banco](https://www.drawdb.app/editor?shareId=2c02833a1771f681013881c8d7be846d)
+
+---
+
 ## Funcionalidades
 
 * **CRUD de Listas de Jogos**:
