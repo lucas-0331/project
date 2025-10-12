@@ -4,6 +4,17 @@ const {PrismaClient} = require('@/generated/prisma/client');
 const prisma = new PrismaClient();
 const {JWT_SECRET, JWT_EXPIRES_IN} = process.env;
 
+/**
+ * @function loginUser
+ * @async
+ * @param {object} req - Request Object.
+ * @param {object} req.body - Body Request.
+ * @param {string} req.body.email - Email User.
+ * @param {string} req.body.password - Password User.
+ * @param {object} res - Response Object.
+ * @returns {object} 200: {data: token}.
+ * @returns {object} 401: {error: string}.
+ */
 const loginUser = async (req, res) => {
     const {email, password} = req.body;
 
@@ -37,7 +48,7 @@ const loginUser = async (req, res) => {
         },
         JWT_SECRET,
         {
-            expiresIn: "24h"
+            expiresIn: JWT_EXPIRES_IN || "24h"
         }
     );
 
