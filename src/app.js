@@ -1,23 +1,31 @@
 const express = require('express');
 const YAML = require('yamljs');
 const swaggerUi = require('swagger-ui-express');
+const routes = require('./routes/routes');
 
 const app = express();
 
 const swaggerDocument = YAML.load('./swagger.yaml');
 
-const gamesRoutes = require('./routes/gamesRoutes');
-const usersRoutes = require('./routes/usersRoutes');
-
 app.use(express.json());
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-
-app.use('/api/games', gamesRoutes);
-app.use('/api/users', usersRoutes);
-
 app.get('/', (req, res) => {
-  res.send('Olá, mundo! API está funcionando!');
+    res.status(200).json({
+        status: 'success',
+        message: 'Bem-vindo à API Vapor, acesse /api para os recursos.',
+        version: '1.0'
+    });
 });
+
+app.use('/api', routes);
+
+app.use((req, res, next) => {
+    res.status(404).json({
+        message: 'Rota não encontrada',
+        path: req.originalUrl
+    });
+});
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 module.exports = app;
