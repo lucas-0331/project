@@ -1,0 +1,12 @@
+model Users {
+  id         Int       @id @default(autoincrement())
+  nick_name  String    @db.VarChar(255)
+  first_name String    @db.VarChar(255)
+  last_name  String    @db.VarChar(255)
+  email      String    @unique @db.VarChar(255)
+  password   String    @db.VarChar(255)
+  birth_date DateTime  @db.Date
+  lists      Lists[]
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at DateTime? @default(now()) @db.Timestamptz(6)
+}
