@@ -4,7 +4,7 @@ info:
   version: 1.0.0
   description: Uma API para gerenciar jogos, documentada em um arquivo YAML.
 servers:
-  - url: http://localhost:3000/api
+  - url: https://vapor-73xs.onrender.com/api
 tags:
   - name: Usuários
     description: Operações relacionadas a usuários
