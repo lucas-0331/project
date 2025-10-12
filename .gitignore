@@ -24,3 +24,4 @@ yarn-error.log*
 .cache/
 .next/
 *.tsbuildinfo
+/src/generated/prisma
