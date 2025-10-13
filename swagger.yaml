@@ -5,16 +5,59 @@ info:
   description: Uma API para gerenciar jogos, documentada em um arquivo YAML.
 servers:
   - url: https://vapor-73xs.onrender.com/api
+    description: Servidor de Produção
+  - url: http://localhost:3000/api
+    description: Servidor Local
 tags:
+  - name: Autenticação
+    description: Operações de login para obter o token de acesso.
   - name: Usuários
-    description: Operações relacionadas a usuários
+    description: Operações relacionadas a usuários.
+  - name: Jogos
+    description: Operações relacionadas a jogos.
 
 paths:
+  /auth/login:
+    post:
+      summary: Autentica o usuário e retorna um token JWT.
+      tags:
+        - Autenticação
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginData'
+      responses:
+        '200':
+          description: Autenticação bem-sucedida. Retorna o token JWT.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: Token de autenticação JWT.
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        '401':
+          description: Credenciais inválidas (e-mail ou senha incorretos).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Credenciais inválidas.
+
   /users:
     get:
-      summary: Retorna a lista de todos os usuários.
+      summary: Retorna a lista de usuários. Requer token de administrador.
       tags:
         - Usuários
+      security:
+        - BearerAuth: []
       responses:
         '200':
           description: Uma lista de objetos de usuário.
@@ -22,8 +65,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
+        '401':
+          description: Acesso negado. Token não fornecido.
+        '403':
+          description: Acesso proibido. Você não tem permissão de administrador ou token inválido.
 
-  /users/store:
+  /users/register:
     post:
       summary: Cria um novo usuário.
       tags:
@@ -45,12 +92,106 @@ paths:
                   message:
                     type: string
                     example: Usuário cadastrado com sucesso!
+                  user:
+                    $ref: '#/components/schemas/User'
         '400':
-          description: Dados inválidos fornecidos.
+          description: Dados inválidos fornecidos (campos obrigatórios ausentes).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Todos os campos são obrigatórios.
+        '409':
+          description: E-mail já em uso.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: O e-mail informado já está em uso.
+
+  /games:
+    get:
+      summary: Retorna a lista de jogos, buscando na API externa da Steam.
+      tags:
+        - Jogos
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Uma lista de jogos (apps) da Steam.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GamesResponse'
+        '401':
+          description: Acesso negado. Token não fornecido.
+        '403':
+          description: Token inválido ou expirado.
 
 components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Insira o token JWT no formato `Bearer <token>`
+
   schemas:
+    LoginData:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: artur@dent.com
+        password:
+          type: string
+          format: password
+          example: senha_segura123
+
     UserData:
+      type: object
+      required:
+        - nick_name
+        - first_name
+        - last_name
+        - email
+        - password
+        - birth_date
+      properties:
+        nick_name:
+          type: string
+          example: ArtDent
+        first_name:
+          type: string
+          example: Artur
+        last_name:
+          type: string
+          example: Dent
+        email:
+          type: string
+          format: email
+          example: artur@dent.com
+        password:
+          type: string
+          format: password
+          description: A senha do usuário.
+          example: senha_segura123
+        birth_date:
+          type: string
+          format: date-time
+          example: "1998-03-31T03:00:00.000Z"
+
+    User:
       type: object
       properties:
         nick_name:
@@ -64,16 +205,39 @@ components:
           example: Dent
         email:
           type: string
+          format: email
           example: artur@dent.com
         birth_date:
           type: string
           format: date-time
           example: "1998-03-31T03:00:00.000Z"
+        role:
+          type: string
+          enum: [USER, ADMIN]
+          example: USER
 
     UserResponse:
       type: object
       properties:
         data:
+          type: object
+          description: O controlador retorna o resultado de 'findFirst', que é um único objeto.
+          $ref: '#/components/schemas/User'
+
+    Game:
+      type: object
+      properties:
+        appid:
+          type: integer
+          example: 10
+        name:
+          type: string
+          example: Counter-Strike
+
+    GamesResponse:
+      type: object
+      properties:
+        data:
           type: array
           items:
-            $ref: '#/components/schemas/UserData'
+            $ref: '#/components/schemas/Game'
