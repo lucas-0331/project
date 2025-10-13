@@ -5,6 +5,6 @@ const {verifyToken} = require('@/middlewares/authMiddleware');
 const {isAdmin} = require('@/middlewares/adminMiddleware');
 
 router.get('/', [verifyToken, isAdmin], userController.getAllUser);
-router.post('/store', userController.storeUser);
+router.post('/register', userController.storeUser);
 
 module.exports = router;
