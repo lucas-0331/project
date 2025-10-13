@@ -23,6 +23,23 @@ const getAllUser = async (req, res) => {
     }
 }
 
+/**
+ * @function storeUser
+ * @async
+ * @param {object} req - Request Object.
+ * @param {object} req.body - Body Request.
+ * @param {string} req.body.nick_name - Nick Name User.
+ * @param {string} req.body.first_name - First Name User.
+ * @param {string} req.body.last_name - Last Name User.
+ * @param {string} req.body.email - Email User.
+ * @param {string} req.body.password - Password User.
+ * @param {date} req.body.birth_date - Birth Date User.
+ * @param {object} res - Response Object.
+ * @returns {object} 201: {message: string, user: object}.
+ * @returns {object} 400: {error: string}.
+ * @returns {object} 409: {error: string}.
+ * @returns {object} 500: {error: string}.
+ */
 const storeUser = async (req, res) => {
     let data = {nick_name, first_name, last_name, email, password, birth_date} = req.body;
 
