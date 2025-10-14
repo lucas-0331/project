@@ -14,7 +14,7 @@ exports.verifyToken = (req, res, next) => {
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
 
-        req.userId = decoded.id;
+        req.user_id = decoded.id;
 
         next();
     } catch (err) {
