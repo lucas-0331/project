@@ -15,6 +15,8 @@ tags:
     description: Operações relacionadas a usuários.
   - name: Jogos
     description: Operações relacionadas a jogos.
+  - name: Listas
+    description: Operações relacionadas às listas personalizadas de cada usuário.
 
 paths:
   /auth/login:
@@ -134,6 +136,134 @@ paths:
         '403':
           description: Token inválido ou expirado.
 
+  /lists:
+    get:
+      summary: Retorna todas as listas pertencentes ao usuário autenticado.
+      tags:
+        - Listas
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Retorna um array contendo todas as listas do usuário.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListsResponse'
+        '500':
+          description: Erro interno do servidor ao buscar as listas.
+
+    post:
+      summary: Cria uma nova lista para o usuário autenticado.
+      tags:
+        - Listas
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListData'
+      responses:
+        '201':
+          description: Lista criada com sucesso.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Lista criada com sucesso!
+                  data:
+                    $ref: '#/components/schemas/List'
+        '400':
+          description: Campos obrigatórios ausentes.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Todos os campos são obrigatórios.
+        '500':
+          description: Erro interno ao criar a lista.
+
+  /lists/{id}:
+    put:
+      summary: Atualiza uma lista existente pertencente ao usuário autenticado.
+      tags:
+        - Listas
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID da lista a ser atualizada.
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListData'
+      responses:
+        '200':
+          description: Lista atualizada com sucesso.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Lista atualizada com sucesso!
+                  data:
+                    $ref: '#/components/schemas/List'
+        '400':
+          description: Campos obrigatórios ausentes.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Todos os campos são obrigatórios.
+        '500':
+          description: Erro interno ao atualizar a lista.
+
+    delete:
+        summary: Exclui uma lista pertencente ao usuário autenticado.
+        tags:
+          - Listas
+        security:
+          - BearerAuth: []
+        parameters:
+          - name: id
+            in: path
+            required: true
+            description: ID da lista a ser excluída.
+            schema:
+              type: integer
+        responses:
+          '200':
+            description: Lista deletada com sucesso.
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      example: Lista deletada com sucesso!
+          '500':
+            description: Erro interno ao deletar a lista.
+
 components:
   securitySchemes:
     BearerAuth:
@@ -241,3 +371,47 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Game'
+
+    List:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        user_id:
+          type: integer
+          example: 42
+        name:
+          type: string
+          example: Favoritos
+        icon:
+          type: string
+          example: 🎮
+        color:
+          type: string
+          example: "#1E90FF"
+
+    ListData:
+      type: object
+      required:
+        - name
+        - icon
+        - color
+      properties:
+        name:
+          type: string
+          example: Meus Jogos
+        icon:
+          type: string
+          example: 🎯
+        color:
+          type: string
+          example: "#FF5733"
+
+    ListsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/List'
