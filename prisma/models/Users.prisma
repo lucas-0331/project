@@ -5,6 +5,7 @@ model Users {
   last_name  String    @db.VarChar(255)
   email      String    @unique @db.VarChar(255)
   password   String    @db.VarChar(255)
+  avatar     String    @db.VarChar(255) @default("https://avatars.akamai.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg")
   birth_date DateTime  @db.Date
   role       Role      @default(USER)
   lists      Lists[]
