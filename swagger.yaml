@@ -119,22 +119,65 @@ paths:
 
   /games:
     get:
-      summary: Retorna a lista de jogos, buscando na API externa da Steam.
+      summary: Retorna a lista de jogos, com paginação por cursor, ordenação e busca por nome.
       tags:
         - Jogos
       security:
-        - BearerAuth: []
+        - BearerAuth: [ ]
+      parameters:
+        - name: cursor
+          in: query
+          required: false
+          description: O ID do último jogo da página anterior. Usado para buscar a próxima página (exceto quando 'search' está ativo).
+          schema:
+            type: integer
+            format: int32
+            example: 8427
+        - name: sortBy
+          in: query
+          required: false
+          description: A coluna pela qual ordenar os resultados. Padrão é 'id'.
+          schema:
+            type: string
+            enum: [ id, appId, name, created_at, updated_at ]
+            default: id
+        - name: setOrder
+          in: query
+          required: false
+          description: A ordem da classificação ('asc' ou 'desc'). Padrão é 'asc'.
+          schema:
+            type: string
+            enum: [ asc, desc ]
+            default: asc
+        - name: search
+          in: query
+          required: false
+          description: Termo de busca (parcial e insensível a maiúsculas/minúsculas) para filtrar jogos por nome. Se presente, a paginação por cursor é ignorada e a busca é limitada a 30 resultados.
+          schema:
+            type: string
+            example: Red Faction
+
       responses:
         '200':
-          description: Uma lista de jogos (apps) da Steam.
+          description: Uma lista de jogos (apps) paginada e o cursor para a próxima página.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GamesResponse'
+                $ref: '#/components/schemas/PaginatedGamesResponse'
         '401':
           description: Acesso negado. Token não fornecido.
         '403':
           description: Token inválido ou expirado.
+        '500':
+          description: Erro interno do servidor ao processar a requisição.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Não foi possível retornar a lista de jogos.
 
   /lists:
     get:
@@ -356,21 +399,49 @@ components:
 
     Game:
       type: object
+      description: Representação de um jogo retornado pelo banco de dados.
       properties:
-        appid:
+        id:
           type: integer
-          example: 10
+          example: 461
+          description: ID interno do jogo no banco de dados.
+        appId:
+          type: integer
+          example: 35450
+          description: ID do aplicativo na Steam.
         name:
           type: string
-          example: Counter-Strike
+          example: 'Red Orchestra 2: Heroes of Stalingrad with Rising Storm'
+        headerImageUrl:
+          type: string
+          format: url
+          example: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/35450/header.jpg?t=1552425243
+        capsuleImageUrl:
+          type: string
+          format: url
+          example: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/35450/capsule_231x87.jpg?t=1552425243
+        created_at:
+          type: string
+          format: date-time
+          example: "2025-10-18T03:38:33.502Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2025-10-18T03:38:33.502Z"
 
-    GamesResponse:
+    PaginatedGamesResponse:
       type: object
+      description: Resposta padrão para a listagem paginada de jogos.
       properties:
         data:
           type: array
           items:
             $ref: '#/components/schemas/Game'
+        cursor:
+          type: integer
+          nullable: true
+          description: O ID do último item retornado. Deve ser usado como 'cursor' na próxima requisição. Será 'null' se a página estiver vazia.
+          example: 8427
 
     List:
       type: object
