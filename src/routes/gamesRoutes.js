@@ -3,6 +3,6 @@ const router = express.Router();
 const gameController = require('../controllers/gameController');
 const {verifyToken} = require('@/middlewares/authMiddleware');
 
-router.get('/', verifyToken, gameController.getAllGames);
+router.get('/', verifyToken, gameController.getGames);
 
 module.exports = router;
