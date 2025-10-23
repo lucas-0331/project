@@ -1,18 +1,34 @@
 const axios = require('axios');
+const {PrismaClient} = require('@/generated/prisma/client');
+const prisma = new PrismaClient();
 
 const getAllGames = async (req, res) => {
+    const { cursor } = req.query;
     try {
-        const response = await axios.get('https://api.steampowered.com/ISteamApps/GetAppList/v2/');
 
-        const games = response.data.applist.apps;
+        if (cursor) {
+            const games = await prisma.games.findMany({
+                take: 20,
+                skip: 1,
+                cursor: {
+                    id: parseInt(cursor)
+                }
+            });
 
-        res.status(200).json({data: games});
+            res.status(200).json({data: games, cursor: games[19].id});
+        }
+
+        const games = await prisma.games.findMany({
+            take: 20
+        });
+
+        res.status(200).json({data: games, cursor: games[19].id});
 
     } catch (error) {
-        console.error('Erro ao buscar jogos da API da Steam:', error);
-        res.status(500).json({error: 'Não foi possível buscar a lista de jogos.'});
+        console.error('Erro ao retornar todos os jogos do banco de dados: ', error);
+        res.status(500).json({error: 'Não foi possível retornar a lista de jogos.'});
     }
-};
+}
 
 module.exports = {
     getAllGames,
