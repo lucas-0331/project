@@ -1,50 +1,43 @@
 const {PrismaClient} = require('@/generated/prisma/client');
 const prisma = new PrismaClient();
 
+const PAGINATION_LIMIT = 30;
+
 const getGames = async (req, res) => {
-    const take = 30;
     const {cursor, sortBy = 'id', setOrder = 'asc', search} = req.query;
 
-    if (setOrder === 'desc' && sortBy === 'id' && !search) {
-        return res.status(500).json({
-            error: 'Não foi possível retornar a lista de jogos, pois a ordenação está decrescente e a coluna está por ID, gerando um problema na busca dos jogos.'
-        });
+    const queryOptions = {
+        take: PAGINATION_LIMIT,
+        orderBy: {
+            [sortBy]: setOrder
+        },
+        where: {}
     }
 
-    const orderByClause = {
-        [sortBy]: setOrder
-    };
+    if (search) {
+        queryOptions.where.name = {
+            contains: search,
+            mode: 'insensitive'
+        }
+    }
+
+    if (!search && cursor) {
+        queryOptions.skip = 1;
+        queryOptions.cursor = {
+            id: parseInt(cursor)
+        }
+    }
+
+    if (typeof queryOptions.orderBy[sortBy] !== 'string') {
+        queryOptions.orderBy[sortBy] = 'asc';
+    }
 
     try {
-        if (search) {
-            const games = await prisma.games.findMany({
-                where: {
-                    name: {contains: search, mode: 'insensitive'}
-                }
-            });
+        const games = await prisma.games.findMany(queryOptions);
 
-            return res.status(200).json({data: games, cursor: games[games.length - 1].id});
-        }
+        const nextCursor = games.length > 0 ? games[games.length - 1].id : null;
 
-        if (cursor) {
-            const games = await prisma.games.findMany({
-                take: take,
-                skip: 1,
-                cursor: {
-                    id: parseInt(cursor)
-                },
-                orderBy: orderByClause
-            });
-
-            return res.status(200).json({data: games, cursor: games[games.length - 1].id});
-        }
-
-        const games = await prisma.games.findMany({
-            take: take,
-            orderBy: orderByClause
-        });
-
-        return res.status(200).json({data: games, cursor: games[games.length - 1].id});
+        return res.status(200).json({data: games, cursor: nextCursor});
     } catch (error) {
         console.error('Erro ao retornar todos os jogos do banco de dados: ', error);
         return res.status(500).json({error: 'Não foi possível retornar a lista de jogos.'});
