@@ -1,0 +1,11 @@
+model ListsGames {
+  id         Int       @id @default(autoincrement())
+  list       Lists     @relation(fields: [list_id], references: [id], onDelete: Cascade)
+  list_id    Int
+  game       Games     @relation(fields: [game_id], references: [id], onDelete: Cascade)
+  game_id    Int
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@unique([list_id, game_id])
+}

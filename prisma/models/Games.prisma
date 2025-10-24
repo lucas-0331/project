@@ -4,6 +4,7 @@ model Games {
   name            String    @db.VarChar(255)
   headerImageUrl  String?   @db.VarChar(255)
   capsuleImageUrl String?   @db.VarChar(255)
+  lists           ListsGames[]
   created_at      DateTime? @default(now()) @db.Timestamptz(6)
   updated_at      DateTime? @default(now()) @db.Timestamptz(6)
 }
