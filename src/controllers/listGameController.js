@@ -20,7 +20,6 @@ const getGamesList = async (req, res) => {
     const { cursor, sortBy = 'id', setOrder = 'asc', search } = req.query;
 
     const queryOptions = {
-        take: PAGINATION_LIMIT,
         orderBy: {},
         where: {
             list_id: listId
@@ -38,6 +37,8 @@ const getGamesList = async (req, res) => {
                 mode: 'insensitive'
             }
         };
+    } else {
+        queryOptions.take = PAGINATION_LIMIT;
     }
 
     // Cursor-based pagination (only when not searching)
@@ -50,7 +51,7 @@ const getGamesList = async (req, res) => {
     const direction = (String(setOrder).toLowerCase() === 'desc') ? 'desc' : 'asc';
 
     // Decide whether to order by a field on the join table (ListsGames) or on the related game
-    const listsGamesFields = ['id', 'game_id', 'created_at', 'updated_at'];
+    const listsGamesFields = ['id', 'game_id', 'created_at'];
     const gamesFields = ['appId', 'name'];
 
     if (listsGamesFields.includes(sortBy)) {
@@ -73,7 +74,11 @@ const getGamesList = async (req, res) => {
 
         const listGames = await prisma.listsGames.findMany(queryOptions);
 
-        const games = listGames.map(item => item.game);
+        const games = listGames.map(item => ({
+            ...item.game,
+            added_in_list_at: item.created_at,
+            list_game_id: item.id
+        }));
 
         const nextCursor = listGames.length > 0 ? listGames[listGames.length - 1].id : null;
 
@@ -166,12 +171,16 @@ const removeGamesFromList = async (req, res) => {
             return res.status(404).json({ error: 'Lista não encontrada.' });
         }
 
-        await prisma.listsGames.deleteMany({
+        const deletedGamesFromList = await prisma.listsGames.deleteMany({
             where: {
                 list_id: listId,
                 game_id: { in: gameIds }
             }
         });
+
+        if (deletedGamesFromList.count === 0) {
+            return res.status(404).json({ error: 'Nenhum dos jogos informados foi encontrado na lista.' });
+        }
 
         return res.status(200).json({ message: 'Jogos removidos da lista com sucesso!' });
         
