@@ -17,6 +17,8 @@ tags:
     description: Operações relacionadas a jogos.
   - name: Listas
     description: Operações relacionadas às listas personalizadas de cada usuário.
+  - name: Listas de Jogos
+    description: Operações relacionadas à associação de jogos às listas personalizadas dos usuários.
 
 paths:
   /auth/login:
@@ -307,6 +309,224 @@ paths:
           '500':
             description: Erro interno ao deletar a lista.
 
+  /games-lists/{id}:
+    get:
+      summary: Retorna todos os jogos pertencentes a uma lista específica do usuário autenticado.
+      description: >
+        Recupera todos os jogos de uma lista específica (`id`) pertencente ao usuário autenticado.
+        Suporta paginação baseada em cursor, busca por nome e ordenação por campos da tabela intermediária (`listsGames`) ou da tabela de jogos (`games`).
+      tags:
+        - Listas de Jogos
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID da lista a ser consultada.
+          schema:
+            type: integer
+            example: 1
+        - name: cursor
+          in: query
+          required: false
+          description: O ID do último item retornado. Usado para paginação (ignorado se 'search' estiver ativo).
+          schema:
+            type: integer
+            example: 123
+        - name: sortBy
+          in: query
+          required: false
+          description: "Campo de ordenação (padrão: `id`)."
+          schema:
+            type: string
+            enum: [id (ListsGames), game_id (ListsGames), created_at (ListsGames), appId (Games), name (Games)]
+            default: id
+        - name: setOrder
+          in: query
+          required: false
+          description: "Direção da ordenação (`asc` ou `desc`). Padrão: `asc`."
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
+        - name: search
+          in: query
+          required: false
+          description: "Filtro parcial (case-insensitive) aplicado ao nome do jogo."
+          schema:
+            type: string
+            example: counter-strike
+      responses:
+        '200':
+          description: Jogos encontrados na lista.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListsGamesResponse'
+        '404':
+          description: Lista não encontrada.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Lista não encontrada.
+        '500':
+          description: Erro interno do servidor.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Não foi possível buscar os jogos da lista.
+
+    post:
+      summary: Adiciona múltiplos jogos a uma lista específica.
+      tags:
+        - Listas de Jogos
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID da lista à qual os jogos serão adicionados.
+          schema:
+            type: integer
+            example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - gameIds
+              properties:
+                gameIds:
+                  type: array
+                  items:
+                    type: integer
+                    example: 35450
+                  description: IDs dos jogos que serão adicionados à lista.
+      responses:
+        '200':
+          description: Jogos adicionados com sucesso.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Jogos adicionados à lista com sucesso!
+        '400':
+          description: Array de IDs ausente ou inválido.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: É necessário informar um array com os IDs dos jogos!
+        '404':
+          description: Lista não encontrada.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Lista não encontrada.
+        '500':
+          description: Erro interno ao adicionar jogos.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Não foi possível adicionar os jogos à lista.
+
+    delete:
+      summary: Remove múltiplos jogos de uma lista específica.
+      tags:
+        - Listas de Jogos
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID da lista da qual os jogos serão removidos.
+          schema:
+            type: integer
+            example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - gameIds
+              properties:
+                gameIds:
+                  type: array
+                  items:
+                    type: integer
+                    example: 8723
+                  description: IDs dos jogos que serão removidos da lista.
+      responses:
+        '200':
+          description: Jogos removidos com sucesso.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Jogos removidos da lista com sucesso!
+        '400':
+          description: Array de IDs ausente ou inválido.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: É necessário informar um array com os IDs dos jogos!
+        '404':
+          description: Lista não encontrada ou nenhum jogo correspondente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Nenhum dos jogos informados foi encontrado na lista.
+        '500':
+          description: Erro interno ao remover jogos.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Não foi possível remover os jogos da lista.
+
 components:
   securitySchemes:
     BearerAuth:
@@ -486,3 +706,28 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/List'
+
+    ListsGamesResponse:
+      type: object
+      description: Retorna os jogos de uma lista específica do usuário autenticado.
+      properties:
+        data:
+          type: array
+          description: Lista dos jogos contidos na lista selecionada.
+          items:
+            allOf:
+              - $ref: '#/components/schemas/Game'
+              - type: object
+                properties:
+                  added_in_list_at:
+                    type: string
+                    format: date-time
+                    example: "2025-10-25T14:28:43.000Z"
+                  list_game_id:
+                    type: integer
+                    example: 147
+        cursor:
+          type: integer
+          nullable: true
+          description: Cursor para a próxima página (retornado apenas quando não há busca ativa).
+          example: 247
