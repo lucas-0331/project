@@ -1,107 +1,142 @@
-# Vapor - Backend
+# Vapor API 🎮
 
-Vapor é um projeto backend desenvolvido em **Node.js** com o framework **Express**, que oferece uma API RESTful para um aplicativo de gerenciamento de listas de jogos. O projeto permite que os usuários criem, atualizem, visualizem e excluam listas de jogos, como "Jogos Completados", "Jogos Desejados", "Jogos Platinados", entre outras.
+API backend para aplicação mobile de gerenciamento de listas personalizadas de jogos da Steam, desenvolvida como parte da disciplina de **Tópicos Especiais II** do curso **Ciência da Computação**, no **IFSULDEMINAS - Campus Muzambinho**.
 
-O backend integra-se com as APIs públicas da **Steam** para obter informações detalhadas sobre os jogos, como nome, descrição, preço e detalhes adicionais, permitindo uma experiência personalizada para o usuário.
+## 📋 Sobre o Projeto
 
-Este projeto foi desenvolvido como parte da disciplina **Tópicos Especiais II** no curso de **Ciência da Computação**.
+A **Vapor API** é uma API RESTful que serve como backend para uma aplicação mobile estilo Pinterest/MyAnimeList, voltada especificamente para jogos da plataforma Steam. A API permite que usuários criem e gerenciem listas personalizadas de jogos, integrada diretamente com dados oficiais da Steam.
 
----
+Este projeto faz parte de uma arquitetura maior, onde:
+- **Frontend**: [Vapor](https://github.com/augustoglago/vapor) (React Native);
+- **Backend**: [Vapor API](https://github.com/lucas-0331/project) (NodeJS).
 
-## Tecnologias Utilizadas
+## 🏗️ Infraestrutura
 
-* **Node.js**: Plataforma para execução do código JavaScript no lado do servidor.
-* **Express**: Framework web para Node.js, utilizado para construção das APIs.
-* **Axios**: Biblioteca para realizar requisições HTTP (usada para consumir a API da Steam).
-* **PostgreSQL**: Banco de dados relacional para armazenar as listas de jogos e dados dos usuários.
-* **Sequelize**: ORM (Object-Relational Mapping) para PostgreSQL, usado para facilitar a manipulação do banco de dados.
-* **dotenv**: Biblioteca para carregar variáveis de ambiente a partir de um arquivo `.env`.
+- **Modelagem do Banco**: [drawDB](https://www.drawdb.app/)
+  - [https://www.drawdb.app/editor?shareId=2c02833a1771f681013881c8d7be846d](https://www.drawdb.app/editor?shareId=2c02833a1771f681013881c8d7be846d)
+- **Hospedagem da API**: [Render](https://render.com/)
+  - [https://vapor-73xs.onrender.com/](https://vapor-73xs.onrender.com/)
+- **Banco de Dados**: [Aiven](https://aiven.io/) (PostgreSQL)
 
----
+## 🚀 Tecnologias Utilizadas
 
-## [Modelagem do Banco](https://www.drawdb.app/editor?shareId=2c02833a1771f681013881c8d7be846d)
+### Core
+- **Node.js** - Ambiente de execução JavaScript;
+- **Express** - Framework web;
+- **Prisma ORM** - ORM para gerenciamento do banco de dados;
+- **PostgreSQL** - Banco de dados relacional.
 
----
+### Autenticação e Segurança
+- **JWT** - Autenticação via tokens;
+- **bcrypt** - Criptografia de senhas.
 
-## Funcionalidades
+### Integrações
+- **Axios** - Cliente HTTP para consumir APIs externas;
+- **Steam API** - Integração com APIs oficiais da Steam.
 
-* **CRUD de Listas de Jogos**:
+### Documentação
+- **Swagger** - Documentação interativa da API.
 
-  * Criar, listar, editar e excluir listas de jogos.
-  * Tipos de listas: "Jogos Completados", "Jogos Desejados", "Jogos Platinados", etc.
+### Outras Dependências
+- **CORS** - Controle de acesso cross-origin;
+- **dotenv** - Gerenciamento de variáveis de ambiente;
+- **pg** - Driver PostgreSQL.
 
-* **Integração com a API da Steam**:
+## 🔗 Integração com Steam API
 
-  * Obtém informações detalhadas sobre os jogos utilizando as rotas públicas da API da Steam:
+A aplicação consome duas rotas públicas da Steam API:
 
-    * `http://api.steampowered.com/ISteamApps/GetAppList/v2/` – Lista todos os jogos disponíveis na Steam.
-    * `https://store.steampowered.com/api/appdetails?appids=<APP_ID>` – Obtém informações detalhadas de um jogo específico.
+1. **Lista de Aplicativos**
+   ```
+   GET https://api.steampowered.com/ISteamApps/GetAppList/v2/
+   ```
+   Retorna lista completa de aplicativos disponíveis na Steam.
 
-* **Busca por jogos**:
+2. **Detalhes do Aplicativo**
+   ```
+   GET https://store.steampowered.com/api/appdetails?appids={appId}
+   ```
+   Retorna informações detalhadas de um jogo específico.
 
-  * Permite que os usuários busquem jogos na Steam para adicionar às suas listas, utilizando o nome do jogo ou ID da Steam.
+## 📚 Documentação da API
 
----
+A documentação completa da API está disponível via Swagger UI.
 
-## Endpoints
+Após iniciar o servidor, acesse:
+```
+http://localhost:3000/api-docs
+```
 
-### 1. **Listas de Jogos**
+Ou acesse a versão em produção:
+```
+https://vapor-73xs.onrender.com/api-docs/
+```
 
-* **GET** `/api/lists`
+## 🔐 Autenticação
 
-  * Retorna todas as listas de jogos do usuário.
+A API utiliza JWT (JSON Web Tokens) para autenticação. Para acessar rotas protegidas:
 
-* **POST** `/api/lists`
+1. Faça login através da rota de autenticação;
+2. Inclua o token recebido no header das requisições:
+```
+Authorization: Bearer {seu-token-aqui}
+```
 
-  * Cria uma nova lista de jogos.
-  * Corpo da requisição:
+## 📦 Instalação e Configuração
 
-    ```json
-    {
-      "name": "Jogos Completados",
-      "description": "Lista de jogos que já terminei"
-    }
-    ```
+### Pré-requisitos
+- PostgreSQL;
+- Node.js (versão 18 ou superior recomendada);
+- Conta no Aiven (para banco de dados);
+- Conta no Render (para deploy).
 
-* **GET** `/api/lists/:id`
+### Instalação Local
 
-  * Retorna uma lista de jogos específica.
+1. Clone o repositório
+```bash
+git clone https://github.com/lucas-0331/project.git
+cd project
+```
 
-* **PUT** `/api/lists/:id`
+2. Instale as dependências
+```bash
+npm install
+```
 
-  * Atualiza as informações de uma lista de jogos.
+3. Configure as variáveis de ambiente
+Crie um arquivo `.env` na raiz do projeto:
+```env
+DATABASE_URL="postgresql://usuario:senha@host:porta/database"
+JWT_SECRET="seu-secret-jwt-aqui"
+JWT_EXPIRES_IN=24h
+```
 
-* **DELETE** `/api/lists/:id`
+4. Execute as migrations do Prisma
+```bash
+npx prisma migrate dev
+```
 
-  * Exclui uma lista de jogos.
+5. Inicie o servidor de desenvolvimento
+```bash
+npm run dev
+```
 
-### 2. **Jogos**
+A API estará disponível em `http://localhost:3000`
 
-* **GET** `/api/games/:gameId`
+## 👥 Equipe de Desenvolvimento
 
-  * Obtém informações detalhadas de um jogo da Steam com base no ID do jogo.
-* **POST** `/api/games/search`
+**Integrantes:**
+- [Augusto Lago](https://github.com/augustoglago);
+- [Erik Abdala](https://github.com/ErikAbdala);
+- [Lucas Costa](https://github.com/lucas-0331);
+- [Pedro Elias](https://github.com/pedrelias).
 
-  * Busca jogos na Steam com base em um nome de jogo ou ID.
+**IFSULDEMINAS - Campus Muzambinho**  
+**Docente:** Hudson de Jesus Ferreira Júnior  
+**Disciplina:** Tópicos Especiais II  
+**Curso:** Ciência da Computação  
+**Turma:** COMP8 (Noturno)
 
-### 3. **Adicionando Jogos à Lista**
+## 📝 Licença
 
-* **POST** `/api/lists/:listId/games`
-
-  * Adiciona um jogo a uma lista específica.
-  * Corpo da requisição:
-
-    ```json
-    {
-      "steamAppId": "570",
-      "status": "completado"
-    }
-    ```
-
----
-
-## Licença
-
-Este projeto é licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICENSE) para mais detalhes.
-
----
+Este projeto é licenciado sob a Licença GNU GPLv3 - veja o arquivo LICENSE para mais detalhes.
