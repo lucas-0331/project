@@ -147,7 +147,7 @@ const removeAchievementsFromList = async (req, res) => {
         });
 
         if (removedAchievements.count === 0) {
-            return res.status(404).json({ error: 'Nenhum dos jogos informados foi encontrado na lista.' });
+            return res.status(404).json({ error: 'Nenhuma das conquistas informadas foi encontrada.' });
         }
 
         return res.status(200).json({ message: 'Conquistas concluídas removidas com sucesso!' });
