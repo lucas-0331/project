@@ -87,6 +87,7 @@ const getAchievementsList = async (req, res) => {
  * @param {object} res - Response object.
  * @response 200 {object} message - Success message.
  * @response 400 {object} error - Error message when required fields are missing.
+ * @response 404 {object} error - Error message if the game is not found.
  * @response 500 {object} error - Error message if something goes wrong on the server.
  */
 const addAchievementsToList = async (req, res) => {
@@ -100,6 +101,12 @@ const addAchievementsToList = async (req, res) => {
     }
 
     try {
+
+        const game = await prisma.games.findFirst({ where: { id: gameId } });
+
+        if (!game) {
+            return res.status(404).json({ error: 'Jogo não encontrado.' });
+        }
 
         const createData = achievementsIds.map(achievementId => ({
             user_id: userId,
@@ -124,7 +131,7 @@ const addAchievementsToList = async (req, res) => {
  * @param {object} res - Response object.
  * @response 200 {object} message - Success message upon removing achievements.
  * @response 400 {object} error - Error message when required fields are missing.
- * @response 404 {object} error - Error message if no achievements were found to remove.
+ * @response 404 {object} error - Error message if no game was found or no achievements were found to remove.
  * @response 500 {object} error - Error message if something goes wrong on the server.
  */
 const removeAchievementsFromList = async (req, res) => {
@@ -138,6 +145,12 @@ const removeAchievementsFromList = async (req, res) => {
     }
 
     try {
+
+        const game = await prisma.games.findFirst({ where: { id: gameId } });
+
+        if (!game) {
+            return res.status(404).json({ error: 'Jogo não encontrado.' });
+        }
 
         const removedAchievements = await prisma.usersAchievements.deleteMany({
             where: {

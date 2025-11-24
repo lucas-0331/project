@@ -544,13 +544,13 @@ paths:
           schema:
             type: integer
       responses:
-        200:
+        '200':
           description: Lista de conquistas e IDs das conquistas concluídas.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AchievementsResponse'
-        404:
+        '404':
           description: Jogo ou conquistas não encontradas.
           content:
             application/json:
@@ -560,7 +560,7 @@ paths:
                   error:
                     type: string
                     example: Nenhuma conquista encontrada para este jogo.
-        500:
+        '500':
           description: Erro ao buscar conquistas.
           content:
             application/json:
@@ -591,7 +591,7 @@ paths:
             schema:
               $ref: '#/components/schemas/AchievementsData'
       responses:
-        200:
+        '200':
           description: Conquistas adicionadas com sucesso.
           content:
             application/json:
@@ -601,7 +601,7 @@ paths:
                   message:
                     type: string
                     example: Conquistas concluídas salvas com sucesso!
-        400:
+        '400':
           description: Body inválido.
           content:
             application/json:
@@ -611,7 +611,17 @@ paths:
                   error:
                     type: string
                     example: É necessário informar um array com os IDs das conquistas!
-        500:
+        '404':
+          description: Jogo não encontrado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Jogo não encontrado.
+        '500':
           description: Erro ao salvar conquistas.
           content:
             application/json:
@@ -642,7 +652,7 @@ paths:
             schema:
               $ref: '#/components/schemas/AchievementsData'
       responses:
-        200:
+        '200':
           description: Conquistas removidas com sucesso.
           content:
             application/json:
@@ -652,7 +662,7 @@ paths:
                   message:
                     type: string
                     example: Conquistas concluídas removidas com sucesso!
-        400:
+        '400':
           description: Body inválido.
           content:
             application/json:
@@ -662,8 +672,8 @@ paths:
                   error:
                     type: string
                     example: É necessário informar um array com os IDs das conquistas!
-        404:
-          description: Nenhum item encontrado para remoção.
+        '404':
+          description: Nenhum jogo encontrado ou nenhum item encontrado para remoção.
           content:
             application/json:
               schema:
@@ -672,7 +682,7 @@ paths:
                   error:
                     type: string
                     example: Nenhuma das conquistas informadas foi encontrada.
-        500:
+        '500':
           description: Erro ao remover conquistas.
           content:
             application/json:
