@@ -32,7 +32,8 @@ Este projeto faz parte de uma arquitetura maior, onde:
 
 ### Integrações
 - **Axios** - Cliente HTTP para consumir APIs externas;
-- **Steam API** - Integração com APIs oficiais da Steam.
+- **Steam API** - Integração com APIs oficiais da Steam;
+- **Cheerio** - Biblioteca para realizar parsing e extração de dados a partir do HTML das páginas de conquistas da Steam.
 
 ### Documentação
 - **Swagger** - Documentação interativa da API.

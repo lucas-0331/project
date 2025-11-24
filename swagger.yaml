@@ -19,6 +19,8 @@ tags:
     description: Operações relacionadas às listas personalizadas de cada usuário.
   - name: Listas de Jogos
     description: Operações relacionadas à associação de jogos às listas personalizadas dos usuários.
+  - name: Conquistas
+    description: Operações relacionadas às conquistas.
 
 paths:
   /auth/login:
@@ -526,6 +528,170 @@ paths:
                   error:
                     type: string
                     example: Não foi possível remover os jogos da lista.
+  
+  /achievements/{id}:
+    get:
+      tags:
+        - Conquistas
+      summary: Retorna todas as conquistas de um jogo e as conquistas concluídas pelo usuário.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID do jogo.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lista de conquistas e IDs das conquistas concluídas.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AchievementsResponse'
+        '404':
+          description: Jogo ou conquistas não encontradas.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Nenhuma conquista encontrada para este jogo.
+        '500':
+          description: Erro ao buscar conquistas.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Não foi possível buscar as conquistas.
+
+    post:
+      tags:
+        - Conquistas
+      summary: Adiciona conquistas concluídas para o usuário autenticado.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID do jogo.
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AchievementsData'
+      responses:
+        '200':
+          description: Conquistas adicionadas com sucesso.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Conquistas concluídas salvas com sucesso!
+        '400':
+          description: Body inválido.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: É necessário informar um array com os IDs das conquistas!
+        '404':
+          description: Jogo não encontrado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Jogo não encontrado.
+        '500':
+          description: Erro ao salvar conquistas.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Não foi possível salvar as conquistas concluídas.
+
+    delete:
+      tags:
+        - Conquistas
+      summary: Remove conquistas concluídas para o usuário autenticado.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID do jogo.
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AchievementsData'
+      responses:
+        '200':
+          description: Conquistas removidas com sucesso.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Conquistas concluídas removidas com sucesso!
+        '400':
+          description: Body inválido.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: É necessário informar um array com os IDs das conquistas!
+        '404':
+          description: Nenhum jogo encontrado ou nenhum item encontrado para remoção.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Nenhuma das conquistas informadas foi encontrada.
+        '500':
+          description: Erro ao remover conquistas.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Não foi possível remover as conquistas concluídas.
 
 components:
   securitySchemes:
@@ -731,3 +897,48 @@ components:
           nullable: true
           description: Cursor para a próxima página (retornado apenas quando não há busca ativa).
           example: 247
+
+    Achievement:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 25
+        game_id:
+          type: integer
+          example: 27
+        name:
+          type: string
+          example: Encantado
+        description:
+          type: string
+          nullable: true
+          example: Coloque um Encantamento na sua armadura
+        image:
+          type: string
+          nullable: true
+          example: https://cdn.fastly.steamstatic.com/steamcommunity/public/images/apps/1593500/a7aed870f8f91f9d1f5947eea55da0d6d40a18c7.jpg
+
+    AchievementsData:
+      type: object
+      required:
+        - achievementsIds
+      properties:
+        achievementsIds:
+          type: array
+          items:
+            type: integer
+            example: 25
+
+    AchievementsResponse:
+      type: object
+      properties:
+        achievementsList:
+          type: array
+          items:
+            $ref: '#/components/schemas/Achievement'
+        completedAchievementsIds:
+          type: array
+          items:
+            type: integer
+            example: 25
