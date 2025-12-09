@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt');
-const { PrismaClient } = require('@/generated/prisma/client');
+const {PrismaClient} = require('@/generated/prisma/client');
 const prisma = new PrismaClient();
 
 const getAllUser = async (req, res) => {
@@ -41,15 +41,14 @@ const getAllUser = async (req, res) => {
  * @returns {object} 500: {error: string}.
  */
 const storeUser = async (req, res) => {
-    let data = {nick_name, first_name, last_name, email, password, birth_date} = req.body;
+    let data = {nick_name, first_name, last_name, avatar, email, password, birth_date} = req.body;
 
     if (!nick_name || !first_name || !last_name || !email || !password || !birth_date) {
         return res.status(400).json({error: 'Todos os campos são obrigatórios.'});
     }
 
     try {
-        const saltRounds = 10;
-        const passwordHash = await bcrypt.hash(data.password, saltRounds);
+        const passwordHash = hashPassword(data.password)
 
         data = {...data, password: passwordHash, role: 'USER'}
 
@@ -68,7 +67,65 @@ const storeUser = async (req, res) => {
     }
 };
 
+const updateUser = async (req, res) => {
+    const {id} = req.params;
+    const {avatar, email, password} = req.body;
+
+    let dataUpdate = {};
+
+    try {
+        const user = await prisma.users.findFirst({where: {id: id}});
+
+        if (!user) {
+            return res.status(404).json({error: 'Usuário não encontrado.'});
+        }
+
+        if (email && email !== user.email) {
+            const emailExists = await prisma.users.findUnique(
+                {where: {email: email}}
+            );
+
+            if (emailExists) {
+                return res.status(400).json({error: 'O e-mail informado já está em uso.'})
+            }
+
+            dataUpdate.email = email;
+        }
+
+        if (password) {
+            dataUpdate.password = hashPassword(password);
+        }
+
+        if (avatar && avatar !== user.avatar) {
+            dataUpdate.avatar = avatar;
+        }
+
+        if (Object.keys(dataUpdate).length === 0) {
+            return res.status(200).json({success: 'Nenhum dado para atualizar.'});
+        }
+
+        const updateUser = await prisma.users.update({
+            where: {id: id},
+            data: dataUpdate
+        });
+
+        delete updateUser['password'];
+
+        res.status(200).json({message: 'Usuário atualizado com sucesso!', user: updateUser});
+
+    } catch (error) {
+        console.error('Erro ao atualizar usuário:', error);
+        return res.status(500).json({ error: 'Erro interno ao atualizar usuário.' });
+    }
+}
+
+async function hashPassword(password) {
+    const saltRounds = 10;
+    return await bcrypt.hash(password, saltRounds);
+}
+
 module.exports = {
     getAllUser,
     storeUser,
+    updateUser
 };
