@@ -6,5 +6,6 @@ const {isAdmin} = require('@/middlewares/adminMiddleware');
 
 router.get('/', [verifyToken, isAdmin], userController.getAllUser);
 router.post('/register', userController.storeUser);
+router.put('/:id', userController.updateUser);
 
 module.exports = router;
