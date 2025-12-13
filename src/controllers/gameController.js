@@ -1,5 +1,7 @@
 const {PrismaClient} = require('@/generated/prisma/client');
 const prisma = new PrismaClient();
+const axios = require('axios');
+const detailsRoute = 'https://store.steampowered.com/api/appdetails?appids=';
 
 const PAGINATION_LIMIT = 30;
 
@@ -44,6 +46,39 @@ const getGames = async (req, res) => {
     }
 }
 
+const getDetails = async (req, res) => {
+    const { appId } = req.params;
+
+    const url = `${detailsRoute}${appId}`
+
+    const { data } = await axios.get(url);
+
+    const sourceData = data[appId].data;
+
+    const gameDTO = {
+        app_id: sourceData.steam_appid,
+        name: sourceData.name,
+        detailed_description: sourceData.detailed_description,
+        about_the_game: sourceData.about_the_game,
+        supported_languages: sourceData.supported_languages,
+        header_image: sourceData.header_image,
+        pc_requirements: sourceData.pc_requirements,
+        developers: sourceData.developers,
+        publishers: sourceData.publishers,
+        price: sourceData.price_overview.final_formatted,
+        platforms: sourceData.platforms,
+        categories: sourceData.categories.map(({description}) => description),
+        genres: sourceData.genres.map(({description}) => description),
+        screenshots: sourceData?.screenshots.map(({path_full}) => path_full),
+        movies: sourceData?.movies.map(({hls_h264}) => hls_h264),
+        release_date: sourceData.release_date,
+        background: sourceData.background
+    }
+
+    return res.status(200).json(gameDTO);
+}
+
 module.exports = {
     getGames,
+    getDetails
 };
