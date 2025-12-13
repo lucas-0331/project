@@ -121,6 +121,69 @@ paths:
                     type: string
                     example: O e-mail informado já está em uso.
 
+  /users/{id}:
+    put:
+      summary: Atualiza dados de um usuário (Avatar, E-mail ou Senha).
+      description: >
+        Atualiza campos específicos do usuário. Apenas os campos enviados no corpo da requisição serão alterados.
+        Se nenhum campo válido for enviado, retorna sucesso informando que nada foi alterado.
+      tags:
+        - Usuários
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID do usuário a ser atualizado.
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateData'
+      responses:
+        '200':
+          description: Usuário atualizado com sucesso ou nenhum dado para atualizar.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      message:
+                        type: string
+                        example: Usuário atualizado com sucesso!
+                      user:
+                        $ref: '#/components/schemas/User'
+                  - type: object
+                    properties:
+                      success:
+                        type: string
+                        example: Nenhum dado para atualizar.
+        '400':
+          description: Erro de validação (ex. E-mail já está em uso).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: O e-mail informado já está em uso.
+        '404':
+          description: Usuário não encontrado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Usuário não encontrado.
+        '500':
+          description: Erro interno ao atualizar usuário.
+
   /games:
     get:
       summary: Retorna a lista de jogos, com paginação por cursor, ordenação e busca por nome.
@@ -820,6 +883,23 @@ components:
           type: object
           description: O controlador retorna o resultado de 'findFirst', que é um único objeto.
           $ref: '#/components/schemas/User'
+
+    UserUpdateData:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: novo.email@dent.com
+        password:
+          type: string
+          format: password
+          description: Nova senha (será criptografada).
+          example: nova_senha123
+        avatar:
+          type: string
+          description: String ou URL representando o avatar.
+          example: "avatar_viking.png"
 
     Game:
       type: object
