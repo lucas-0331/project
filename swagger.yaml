@@ -183,6 +183,44 @@ paths:
                     type: string
                     example: Não foi possível retornar a lista de jogos.
 
+  /games/{appId}/details:
+    get:
+      summary: Retorna detalhes completos de um jogo (via Steam API).
+      description: >
+        Busca informações detalhadas de um jogo específico utilizando o ID da Steam (appId).
+        Os dados são obtidos diretamente da API pública da Steam e formatados.
+      tags:
+        - Jogos
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: appId
+          in: path
+          required: true
+          description: O ID do aplicativo na Steam (Steam App ID).
+          schema:
+            type: integer
+            example: 35450
+      responses:
+        '200':
+          description: Detalhes do jogo retornados com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameDetails'
+        '401':
+          description: Acesso negado. Token não fornecido ou inválido.
+        '500':
+          description: Erro ao buscar detalhes na API externa.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Erro interno do servidor.
+
   /lists:
     get:
       summary: Retorna todas as listas pertencentes ao usuário autenticado.
@@ -285,31 +323,31 @@ paths:
           description: Erro interno ao atualizar a lista.
 
     delete:
-        summary: Exclui uma lista pertencente ao usuário autenticado.
-        tags:
-          - Listas
-        security:
-          - BearerAuth: []
-        parameters:
-          - name: id
-            in: path
-            required: true
-            description: ID da lista a ser excluída.
-            schema:
-              type: integer
-        responses:
-          '200':
-            description: Lista deletada com sucesso.
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
-                      example: Lista deletada com sucesso!
-          '500':
-            description: Erro interno ao deletar a lista.
+      summary: Exclui uma lista pertencente ao usuário autenticado.
+      tags:
+        - Listas
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID da lista a ser excluída.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lista deletada com sucesso.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Lista deletada com sucesso!
+        '500':
+          description: Erro interno ao deletar a lista.
 
   /games-lists/{id}:
     get:
@@ -814,6 +852,90 @@ components:
           type: string
           format: date-time
           example: "2025-10-18T03:38:33.502Z"
+
+    GameDetails:
+      type: object
+      description: Detalhes completos do jogo retornados pela rota de detalhes.
+      properties:
+        app_id:
+          type: integer
+          example: 35450
+        name:
+          type: string
+          example: "Red Orchestra 2: Heroes of Stalingrad with Rising Storm"
+        detailed_description:
+          type: string
+          description: Descrição completa em formato HTML.
+        about_the_game:
+          type: string
+          description: Resumo sobre o jogo em formato HTML.
+        supported_languages:
+          type: string
+          description: String HTML contendo os idiomas suportados.
+        header_image:
+          type: string
+          format: url
+          example: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/35450/header.jpg"
+        pc_requirements:
+          type: object
+          description: Objeto contendo requisitos mínimos e recomendados.
+        developers:
+          type: array
+          items:
+            type: string
+          example: ["Tripwire Interactive"]
+        publishers:
+          type: array
+          items:
+            type: string
+          example: ["Tripwire Interactive"]
+        price:
+          type: string
+          description: Preço formatado vindo da Steam.
+          example: "R$ 49,99"
+        platforms:
+          type: object
+          properties:
+            windows:
+              type: boolean
+            mac:
+              type: boolean
+            linux:
+              type: boolean
+        categories:
+          type: array
+          items:
+            type: string
+          example: ["Um jogador", "Multijogador", "Coop"]
+        genres:
+          type: array
+          items:
+            type: string
+          example: ["Ação", "RPG"]
+        screenshots:
+          type: array
+          description: Lista de URLs das capturas de tela.
+          items:
+            type: string
+            format: url
+        movies:
+          type: array
+          description: Lista de URLs de vídeo (HLS).
+          items:
+            type: string
+            format: url
+        release_date:
+          type: object
+          properties:
+            coming_soon:
+              type: boolean
+            date:
+              type: string
+              example: "13 set. 2011"
+        background:
+          type: string
+          format: url
+          example: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/35450/page_bg_generated_v6b.jpg"
 
     PaginatedGamesResponse:
       type: object
