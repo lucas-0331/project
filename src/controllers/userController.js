@@ -41,16 +41,24 @@ const getAllUser = async (req, res) => {
  * @returns {object} 500: {error: string}.
  */
 const storeUser = async (req, res) => {
-    let data = {nick_name, first_name, last_name, avatar, email, password, birth_date} = req.body;
+    let data = {nick_name, first_name, last_name, avatar_id, email, password, birth_date} = req.body;
 
     if (!nick_name || !first_name || !last_name || !email || !password || !birth_date) {
-        return res.status(400).json({error: 'Todos os campos são obrigatórios.'});
+        return res.status(400).json({error: 'Com exceção do ID do avatar, todos os campos são obrigatórios.'});
     }
 
     try {
-        const passwordHash = hashPassword(data.password)
+        const passwordHash = await hashPassword(data.password)
 
         data = {...data, password: passwordHash, role: 'USER'}
+
+        if (avatar_id) {
+            const avatarExists = await prisma.avatars.findUnique({where: {id: Number(avatar_id)}});
+            if (avatarExists) {
+                data.avatar = avatarExists.link;
+            }
+            delete data['avatar_id'];
+        }
 
         const createUser = await prisma.users.create({data: data});
 
@@ -69,12 +77,12 @@ const storeUser = async (req, res) => {
 
 const updateUser = async (req, res) => {
     const {id} = req.params;
-    const {avatar, email, password} = req.body;
+    const {avatar_id, email, password} = req.body;
 
     let dataUpdate = {};
 
     try {
-        const user = await prisma.users.findFirst({where: {id: id}});
+        const user = await prisma.users.findFirst({where: {id: Number(id)}});
 
         if (!user) {
             return res.status(404).json({error: 'Usuário não encontrado.'});
@@ -93,19 +101,24 @@ const updateUser = async (req, res) => {
         }
 
         if (password) {
-            dataUpdate.password = hashPassword(password);
+            dataUpdate.password = await hashPassword(password);
         }
 
-        if (avatar && avatar !== user.avatar) {
-            dataUpdate.avatar = avatar;
+        if (avatar_id) {
+            const avatarExists = await prisma.avatars.findUnique({where: {id: Number(avatar_id)}});
+            if (avatarExists) {
+                dataUpdate.avatar = avatarExists.link;
+            }
         }
 
         if (Object.keys(dataUpdate).length === 0) {
             return res.status(200).json({success: 'Nenhum dado para atualizar.'});
         }
 
+        dataUpdate.updated_at = new Date();
+
         const updateUser = await prisma.users.update({
-            where: {id: id},
+            where: {id: Number(id)},
             data: dataUpdate
         });
 
@@ -124,8 +137,52 @@ async function hashPassword(password) {
     return await bcrypt.hash(password, saltRounds);
 }
 
+/**
+ * @function getUserDetails
+ * @description Retrieves details of the authenticated user.
+ * @async
+ * @param {object} req - Request object.
+ * @param {object} res - Response object.
+ * @response 200 {object} data - The user details.
+ * @response 404 {object} error - Error message if user not found.
+ * @response 500 {object} error - Error message if something goes wrong on the server.
+ */
+const getUserDetails = async (req, res) => {
+
+    const user_id = req.user_id;
+
+    try {
+
+        const user = await prisma.users.findUnique({
+            where: { id: Number(user_id) },
+            select: {
+                nick_name: true,
+                first_name: true,
+                last_name: true,
+                email: true,
+                birth_date: true,
+                avatar: true,
+                role: true,
+                created_at: true,
+                updated_at: true
+            }
+        });
+
+        if (!user) {
+            return res.status(404).json({ error: 'Usuário não encontrado.' });
+        }
+
+        return res.status(200).json({ data: user });
+
+    } catch (error) {
+        console.error('Erro ao buscar detalhes do usuário:', error);
+        return res.status(500).json({ error: 'Não foi possível buscar os detalhes do usuário.' });
+    }
+}
+
 module.exports = {
     getAllUser,
+    getUserDetails,
     storeUser,
     updateUser
 };
