@@ -13,6 +13,8 @@ tags:
     description: Operações de login para obter o token de acesso.
   - name: Usuários
     description: Operações relacionadas a usuários.
+  - name: Avatares
+    description: Operações relacionadas aos avatares disponíveis.
   - name: Jogos
     description: Operações relacionadas a jogos.
   - name: Listas
@@ -76,6 +78,28 @@ paths:
         '403':
           description: Acesso proibido. Você não tem permissão de administrador ou token inválido.
 
+  /users/me:
+    get:
+      summary: Retorna os detalhes do usuário autenticado.
+      tags:
+        - Usuários
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Detalhes do usuário autenticado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Acesso negado. Token não fornecido.
+        '404':
+          description: Usuário não encontrado.
+
   /users/register:
     post:
       summary: Cria um novo usuário.
@@ -120,6 +144,60 @@ paths:
                   error:
                     type: string
                     example: O e-mail informado já está em uso.
+
+  /users/{id}:
+    put:
+      summary: Atualiza parte dos dados do usuário identificado por ID.
+      tags:
+        - Usuários
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID do usuário a ser atualizado.
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: artur@dent.com
+                password:
+                  type: string
+                  format: password
+                  example: senha_segura123
+                avatar_id:
+                  type: integer
+                  example: 5
+      responses:
+        '200':
+          description: Usuário atualizado com sucesso.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Usuário atualizado com sucesso!
+                  user:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Dados inválidos ou e-mail em uso.
+        '401':
+          description: Acesso negado. Token não fornecido.
+        '404':
+          description: Usuário não encontrado.
+        '500':
+          description: Erro interno ao atualizar o usuário.
 
   /games:
     get:
@@ -731,6 +809,30 @@ paths:
                     type: string
                     example: Não foi possível remover as conquistas concluídas.
 
+  /avatars:
+    get:
+      summary: Retorna a lista de avatares disponíveis.
+      tags:
+        - Avatares
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Lista de avatares retornada com sucesso.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Avatar'
+        '401':
+          description: Acesso negado. Token não fornecido.
+        '500':
+          description: Erro interno ao listar avatares.
+
 components:
   securitySchemes:
     BearerAuth:
@@ -787,6 +889,10 @@ components:
           type: string
           format: date-time
           example: "1998-03-31T03:00:00.000Z"
+        avatar_id:
+          type: integer
+          example: 5
+          description: ID interno do avatar disponibilizado na lista de avatares do banco relacional.
 
     User:
       type: object
@@ -812,14 +918,27 @@ components:
           type: string
           enum: [USER, ADMIN]
           example: USER
+        avatar:
+          type: string
+          format: url
+          example: 'https://avatars.fastly.steamstatic.com/efc519e6c9a2a9dfbec5fe791061633f948ea457_full.jpg'
+        created_at:
+          type: string
+          format: date-time
+          example: "2025-10-18T03:38:33.502Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2025-10-18T03:38:33.502Z"
 
     UserResponse:
       type: object
       properties:
         data:
-          type: object
-          description: O controlador retorna o resultado de 'findFirst', que é um único objeto.
-          $ref: '#/components/schemas/User'
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+          description: Lista de usuários retornada pelo endpoint de administração.
 
     Game:
       type: object
@@ -1064,3 +1183,14 @@ components:
           items:
             type: integer
             example: 25
+
+    Avatar:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        link:
+          type: string
+          format: url
+          example: 'https://avatars.fastly.steamstatic.com/efc519e6c9a2a9dfbec5fe791061633f948ea457_full.jpg'
