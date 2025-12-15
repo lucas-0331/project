@@ -49,7 +49,7 @@ const getGames = async (req, res) => {
 const getDetails = async (req, res) => {
     const { appId } = req.params;
 
-    const url = `${detailsRoute}${appId}`
+    const url = `${detailsRoute}${appId}&l=brazilian`
 
     const { data } = await axios.get(url);
 
