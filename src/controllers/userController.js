@@ -156,6 +156,7 @@ const getUserDetails = async (req, res) => {
         const user = await prisma.users.findUnique({
             where: { id: Number(user_id) },
             select: {
+                id: true,
                 nick_name: true,
                 first_name: true,
                 last_name: true,
