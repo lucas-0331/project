@@ -2,6 +2,8 @@
 
 API backend para aplicação mobile de gerenciamento de listas personalizadas de jogos da Steam, desenvolvida como parte da disciplina de **Tópicos Especiais II** do curso **Ciência da Computação**, no **IFSULDEMINAS - Campus Muzambinho**.
 
+![Preview](assets/images/preview.png)
+
 ## 📋 Sobre o Projeto
 
 A **Vapor API** é uma API RESTful que serve como backend para uma aplicação mobile estilo Pinterest/MyAnimeList, voltada especificamente para jogos da plataforma Steam. A API permite que usuários criem e gerenciem listas personalizadas de jogos, integrada diretamente com dados oficiais da Steam.
@@ -72,6 +74,19 @@ Ou acesse a versão em produção:
 ```
 https://vapor-73xs.onrender.com/api-docs/
 ```
+
+## ✨ Funcionalidades
+
+- **Autenticação**: login via `/auth/login` com emissão de token JWT (Bearer);
+- **Gerenciamento de usuários**: registro (`/users/register`), leitura (`/users`, `/users/me`), atualização parcial (`/users/{id}`) e permissões administrativas;
+- **Avatares**: listagem de avatares disponíveis (`/avatars`);
+- **Listas pessoais**: criação, leitura, atualização e exclusão de listas do usuário (`/lists`, `/lists/{id}`) com ícone e cor;
+- **Associação de jogos a listas**: adicionar/remover múltiplos jogos e listar jogos de uma lista específica com paginação, busca e ordenação (`/games-lists/{id}`);
+- **Jogos**: listagem paginada de jogos com cursor, ordenação e busca por nome (`/games`);
+- **Detalhes de jogo**: obtenção de detalhes completos via Steam API (`/games/{appId}/details`), incluindo imagens, screenshots, descrição e requisitos;
+- **Conquistas**: listar conquistas de um jogo e gerenciar conquistas concluídas do usuário (`/achievements/{id}`);
+- **Paginação e filtros**: suporte a `cursor`, `search`, `sortBy` e `setOrder` em endpoints relevantes;
+- **Segurança e erros**: rotas protegidas com `BearerAuth` e respostas de erro padronizadas (401/403/404/500).
 
 ## 🔐 Autenticação
 
