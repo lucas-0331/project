@@ -814,8 +814,6 @@ paths:
       summary: Retorna a lista de avatares disponíveis.
       tags:
         - Avatares
-      security:
-        - BearerAuth: []
       responses:
         '200':
           description: Lista de avatares retornada com sucesso.
@@ -828,8 +826,6 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Avatar'
-        '401':
-          description: Acesso negado. Token não fornecido.
         '500':
           description: Erro interno ao listar avatares.
 
